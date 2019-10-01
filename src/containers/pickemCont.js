@@ -6,7 +6,8 @@ import $ from 'jquery'
 
 class PickemCont extends React.Component {
   state = {
-    week: ''
+    week: '',
+    games: ''
   };
 
   weekTimes = {
@@ -44,13 +45,24 @@ class PickemCont extends React.Component {
     'NY':'NYJ'
   }
 
+
+
+  componentDidMount() {
+    this.setState({games: this.props.games})
+  }
+
+  componentDidUpdate(prevState) {
+    if (prevState.games !== this.props.games) {
+      this.setState({games: this.props.games})
+    }
+  }
+
   submit = () => {
     let teams = ""
     const clickedd = $('.active-pick')
     for (let i=0;i<clickedd.length;i++) {
       teams+=clickedd[i].dataset.id+','
     }
-    console.log(teams);
     fetch('http://localhost:3000/pickems', {
       method: 'POST',
       headers: HEADERS,
@@ -67,27 +79,26 @@ class PickemCont extends React.Component {
   }
 
   render = () => {
-    console.log(this.props);
+
     return (
       <div className="flex column justify-align azure">
         <h1>Venmo @Joshua-Gluck</h1>
         <h3 style={{color: 'grey', marginTop: '-5px'}}>$20 Buy-in Winner Take All</h3>
       {
-        this.props.games ?
-        this.props.games.map(game => {
+        this.state.games ?
+        this.state.games.map(game => {
           return <PickemCard game={game} />
         })
         :
         'loading...'
       }
-      <span onClick={this.submit} className={this.props.user && this.props.games ? !localStorage.getItem('user') || this.props.user.pickems[this.props.user.pickems.length-1].week === this.props.games[0].schedule.week ? 'pickem-btn inactive' : 'pickem-btn' : null}>Save</span>
+      <span onClick={this.submit} className={this.props.user && this.props.games ? !localStorage.getItem('user') || this.props.user.pickems[this.props.user.pickems.length-1].week === this.props.games[0].schedule.week ? 'pickem-btn inactive' : 'pickem-btn' : 'pickem-btn inactive'}>Save</span>
       </div>
     );
   };
 }
 
 const mapStateToProps = state => {
-  console.log(state);
   return {
     games: state.games.games,
     refs: state.games.refs,

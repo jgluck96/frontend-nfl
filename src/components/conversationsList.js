@@ -1,14 +1,17 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import { ActionCable } from 'react-actioncable-provider';
 import { API_ROOT } from '../constants';
 import NewConversationForm from './newConversationForm';
 import MessagesArea from './messagesArea';
+import NewMessageForm from './newMessageForm';
 import Cable from './cable';
+import $ from 'jquery'
 
 class ConversationsList extends React.Component {
   state = {
     conversations: [],
-    activeConversation: null
+    activeConversation: null,
+    clicked: false
   };
 
   componentDidMount = () => {
@@ -39,11 +42,22 @@ class ConversationsList extends React.Component {
     this.setState({ conversations });
   };
 
+  closeChat = () => {
+    // $('conversationsList').addClass('collapse')
+    this.setState({clicked: !this.state.clicked})
+  }
+
   render = () => {
     console.log(this.state);
     const { conversations, activeConversation } = this.state;
     return (
-      <div className="conversationsList">
+    <Fragment>
+
+      <div className={this.state.clicked ? "conversationsList collapse-chat" : "conversationsList"}>
+        <div onClick={this.closeChat} className='exit-chat'>
+          <div className={this.state.clicked ? 'enter-chat1' : 'exit-chat1'}></div>
+          <div className={this.state.clicked ? 'enter-chat2' : 'exit-chat2'}></div>
+        </div>
         <ActionCable
           channel={{ channel: 'ConversationsChannel' }}
           onReceived={this.handleReceivedConversation}
@@ -54,13 +68,15 @@ class ConversationsList extends React.Component {
             handleReceivedMessage={this.handleReceivedMessage}
           />
         ) : null}
-        <h2>Chat</h2>
+        <div style={{textAlign: 'center', curser: 'pointer'}}>Chat</div>
         {activeConversation ? (
           <MessagesArea
             id={8} title={'football'} messages={this.state.conversations.length > 0 ? this.state.conversations[0].messages : null}
           />
         ) : null}
+        <NewMessageForm conversation_id={8} />
       </div>
+      </Fragment>
     );
   };
 }

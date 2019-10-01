@@ -34,8 +34,8 @@ class Nav extends Component {
           {
             localStorage.getItem('user') ?
           <Fragment>
-            <li onClick={()=> this.props.logout()} className='nav-item'>
-              <a className='nav-link' href='/'>
+            <li className='nav-item'>
+              <a onClick={()=> this.props.logout()} className='nav-link' href='/'>
               Logout
               </a>
             </li>

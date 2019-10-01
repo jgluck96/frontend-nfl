@@ -6,14 +6,27 @@ export const fetchGames = () => {
      fetch(`https://api.mysportsfeeds.com/v2.1/pull/nfl/2019-regular/week/${week}/games.json`,{
        method: 'GET',
        headers: {
-         "Authorization": "Basic " + btoa('9e4bd2ea-1f12-4ae1-b062-6c2d0f' + ":" + 'MYSPORTSFEEDS')
+        "Authorization": "Basic " + btoa('9e4bd2ea-1f12-4ae1-b062-6c2d0f' + ":" + 'MYSPORTSFEEDS')
        }
-     })
-     .then(res => res.json())
+     }).then(res => res.json())
      .then(data => {
+       console.log(data.games);
        dispatch({type:'FETCH_GAMES', payload: {games: data.games, refs: data.references.teamReferences}})
        dispatch({type: 'WEEK', payload: week})
     })
+      setInterval( () => {
+        fetch(`https://api.mysportsfeeds.com/v2.1/pull/nfl/2019-regular/week/${week}/games.json`,{
+          method: 'GET',
+          headers: {
+           "Authorization": "Basic " + btoa('9e4bd2ea-1f12-4ae1-b062-6c2d0f' + ":" + 'MYSPORTSFEEDS')
+          }
+        }).then(res => res.json())
+        .then(data => {
+          dispatch({type:'FETCH_GAMES', payload: {games: data.games, refs: data.references.teamReferences}})
+          dispatch({type: 'WEEK', payload: week})
+       })
+     }, 10000)
+
    })
  }
 }

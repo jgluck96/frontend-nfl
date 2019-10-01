@@ -37,13 +37,13 @@ class Main extends React.Component {
   componentDidUpdate(prevState) {
     if (localStorage.getItem('user')) {
       const parsedLocal = JSON.parse(localStorage.getItem('user'))
-      if(parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].week === this.props.week) {
+      if(prevState.user && parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].week === this.props.week) {
+        $('.mypick').remove()
         const userteams = this.props.user.pickems[this.props.user.pickems.length-1].teams.split(',')
-          console.log(userteams);
+          console.log(prevState.user, userteams);
           userteams.forEach(team => {
             if(team) {
-            console.log($(document).find(`[data-id='${team}']`))
-            $(document).find(`[data-id='${team}']`).append(`<div className='mypick'}>My Pick</div>`)
+            $(document).find(`[data-id='${team}']`).append(`<div className='mypick'>My Pick</div>`)
             $(document).find(`.pickem-card`).addClass('inactive')
             }
           })
@@ -75,7 +75,6 @@ class Main extends React.Component {
 }
 
 const mapStateToProps = state => {
-  console.log(state);
   return {
     loginModal: state.modals.loginModal,
     signupModal: state.modals.signupModal,

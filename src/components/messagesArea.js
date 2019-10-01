@@ -1,5 +1,5 @@
 import React from 'react';
-import NewMessageForm from './newMessageForm';
+
 import {connect} from 'react-redux'
 
 class MessagesArea extends React.Component {
@@ -9,7 +9,7 @@ class MessagesArea extends React.Component {
       <div className='area-container'>
         <ul style={{padding: '0'}}>{orderedMessages(this.props.messages)}</ul>
       </div>
-      <NewMessageForm conversation_id={this.props.id} />
+
     </div>
   )}
 };
