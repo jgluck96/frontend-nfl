@@ -16,6 +16,12 @@ export const openPickemPrize = () => {
     payload: true
     }
 }
+export const openRankings = () => {
+  return {
+    type: 'OPEN_RANKINGS',
+    payload: true
+    }
+}
 
 export const closeModal = () => {
   return {

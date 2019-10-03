@@ -10,6 +10,7 @@ import Nav from '../components/nav'
 import Login from './login'
 import {login} from '../actions/users'
 import Signup from './signup'
+import Rankings from './rankings'
 import PickemPrize from './pickemPrize'
 import $ from 'jquery'
 
@@ -113,6 +114,9 @@ class Main extends React.Component {
           this.props.pickemModal ?
           <PickemPrize />
           :
+          this.props.rankingsModal ?
+          <Rankings />
+          :
           null
         }
       </div>
@@ -125,6 +129,7 @@ const mapStateToProps = state => {
     loginModal: state.modals.loginModal,
     signupModal: state.modals.signupModal,
     pickemModal: state.modals.pickemModal,
+    rankingsModal: state.modals.rankingsModal,
     week: state.week,
     user: state.user.user,
     odds: state.odds

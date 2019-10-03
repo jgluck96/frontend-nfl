@@ -535,3 +535,28 @@ color: brown;
 }
 
 /* loader */
+.pickem-img {
+  height: 50px;
+  width: 50px
+}
+@media (max-width: 500px) {
+  .pickem-card {
+    min-width: 130px !important;
+    width: 130px !important;
+    font-size: 14px;
+    padding: 5px 10px
+  }
+  .pickem-img {
+    height: 30px;
+    width: 30px
+  }
+  .mlr15 {
+    margin-left: 5px;
+    margin-right: 5px
+  }
+}
+
+.rankings-container {
+  height: 225px;
+    overflow-y: scroll;
+}

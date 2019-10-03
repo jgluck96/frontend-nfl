@@ -2,7 +2,7 @@ import React from 'react';
 import { HEADERS } from '../constants';
 import PickemCard from '../components/pickemCard'
 import {connect} from 'react-redux'
-import {openPickemPrize} from '../actions/modals'
+import {openPickemPrize, openRankings} from '../actions/modals'
 import {updateUser} from '../actions/users'
 import CountUp from 'react-countup';
 
@@ -14,7 +14,8 @@ class PickemCont extends React.Component {
     games: '',
     teams: '',
     remaining: 60000,
-    salary: 0
+    salary: 0,
+    teamOdds: []
   };
 
   weekTimes = {
@@ -97,10 +98,29 @@ class PickemCont extends React.Component {
       //     $(document).find(`.pickem-card`).addClass('inactive')
       //     }
       //   })
+      this.props.updateUser(data)
       localStorage.setItem('user', JSON.stringify(data))
+      this.state.teamOdds.map(team => {
+        fetch('http://localhost:3000/team_odds', {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify({
+            odds: team.odds,
+            user_id: this.props.user.id,
+            name: team.name,
+            week: team.week,
+            winnings: team.winnings
+          })
+        })
+      })
       this.setState({
+        week: '',
+        games: '',
         teams: '',
-        salary: 0
+        remaining: 60000,
+        salary: 0,
+        teamOdds: []
+
       })
     })
   }
@@ -110,7 +130,7 @@ class PickemCont extends React.Component {
   //   this.setState({salary: potential})
   // }
 
-  addTeam = (team1, team2, team1Money, team2Money) => {
+  addTeam = (team1, team2, team1Money, team2Money, odds) => {
     const adjust = this.state.teams.split(',')
 
     if (!adjust[0]) {
@@ -120,20 +140,23 @@ class PickemCont extends React.Component {
     if (adjust.includes(team1)) {
       const index1 = adjust.indexOf(team1)
       adjust.splice(index1,1)
-      this.setState({teams: adjust.join(','), remaining: this.state.remaining+(60000/this.props.games.length), salary: this.state.salary-team1Money}, ()=> console.log(this.state.salary))
+      const newTeams = this.state.teamOdds.filter(team => team.name !== team1)
+      this.setState({teams: adjust.join(','), teamOdds: newTeams, remaining: this.state.remaining+(60000/this.props.games.length), salary: this.state.salary-team1Money}, ()=> console.log(this.state.teamOdds))
     } else {
-      console.log('other', team2Money);
       const index2 = adjust.indexOf(team2)
       let money = this.state.salary + team1Money
       let remaining = this.state.remaining-(60000/this.props.games.length)
-      console.log('b4',money);
+      let newTeams = [...this.state.teamOdds,{name: team1, winnings: team1Money, week: this.props.week, odds: odds}]
       if(index2 != -1) {
         money-=team2Money
         remaining += (60000/this.props.games.length)
         adjust.splice(index2,1)
+        newTeams = newTeams.filter(team => team.name !== team2)
       }
       adjust.push(team1)
-      this.setState({teams: adjust.join(','), remaining: remaining, salary: money}, ()=> console.log(this.state.salary))
+      // [{name:.., odds:..., week:.., winnings: ..., week: this.props.week}]
+
+      this.setState({teams: adjust.join(','), remaining: remaining, salary: money, teamOdds: newTeams}, ()=> console.log(this.state.teamOdds))
 
     }
   }
@@ -143,7 +166,7 @@ class PickemCont extends React.Component {
     return (
       <div className="flex column justify-align azure">
         <h2>Venmo @Joshua-Gluck</h2>
-        <h3 style={{color: 'grey', marginTop: '-5px'}}>$20 Buy-in Winner Take All <span style={{color: 'blue', cursor: 'pointer'}} onClick={()=>this.props.openPickemPrize()}>Prize Layout</span></h3>
+        <h3 style={{color: 'grey', marginTop: '-5px'}}><span style={{color: 'blue', cursor: 'pointer'}} onClick={()=>this.props.openRankings()}>Live Rankings </span>$20 Buy-in Winner Take All <span style={{color: 'blue', cursor: 'pointer'}} onClick={()=>this.props.openPickemPrize()}>Prize Layout</span></h3>
         <h4>Instructions: Pick your game-winners wisely as your profits from games you won will be accummulated. </h4>
         <div style={{fontSize:'25px'}}><span>Salary Remaining:</span>
           <CountUp
@@ -167,7 +190,7 @@ class PickemCont extends React.Component {
         :
         <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
       }
-      <span onClick={this.submit} className={this.props.user && this.props.games ? !localStorage.getItem('user') || (this.props.user.pickems.length > 0 && this.props.user.pickems[this.props.user.pickems.length-1].week === this.props.games[0].schedule.week) ? 'pickem-btn inactive' : 'pickem-btn' : 'pickem-btn inactive'}>Save</span>
+      <span onClick={this.submit} className={this.props.user && this.props.games ? !localStorage.getItem('user') || (this.props.user.pickems.length > 0 && this.props.user.pickems[this.props.user.pickems.length-1].week === this.props.games[0].schedule.week) ? 'pickem-btn inactive' : 'pickem-btn' : 'pickem-btn inactive'}>Submit</span>
       </div>
     );
   };
@@ -183,4 +206,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps, {openPickemPrize, updateUser})(PickemCont);
+export default connect(mapStateToProps, {openPickemPrize, openRankings, updateUser})(PickemCont);

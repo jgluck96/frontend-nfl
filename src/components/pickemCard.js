@@ -219,9 +219,7 @@ class PickemCard extends React.Component {
     }
     if (localStorage.getItem('user')) {
       const parsedLocal = JSON.parse(localStorage.getItem('user'))
-      console.log(prevState.user, prevState);
       if(prevState.user && (parsedLocal.user.pickems.length > 0 && parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].week === this.props.week)) {
-        console.log('innn');
         $('.mypick').remove()
         $('.my-pick').remove()
         const userteams = parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].teams.split(',')
@@ -261,7 +259,7 @@ class PickemCard extends React.Component {
          }
       }
       // const winnings =
-      this.props.addTeam(this.props.away, this.props.home, away, other)
+      this.props.addTeam(this.props.away, this.props.home, away, other, this.state.awayOdds)
 
       // this.setState({awayClicked: !this.state.awayClicked, homeClicked: false})
     } else {
@@ -283,7 +281,7 @@ class PickemCard extends React.Component {
            other = (this.state.salary/(Math.abs(this.state.awayOdds)/Math.pow(10, 2)))+this.state.salary
          }
       }
-      this.props.addTeam(this.props.home, this.props.away, home, other)
+      this.props.addTeam(this.props.home, this.props.away, home, other, this.state.homeOdds)
       // this.setState({homeClicked: !this.state.homeClicked, awayClicked: false})
     }
   }
@@ -346,11 +344,11 @@ class PickemCard extends React.Component {
                   <div style={{color: 'green', fontSize: '14px'}} id='away'>{this.state.awayOdds ? this.state.awayOdds >= 2 ? '+'+this.state.awayOdds : this.state.awayOdds : <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>}</div>
               </div>
               {this.props.teams.includes(this.props.away) ? <div className='my-pick'>My Pick</div> : null }
-              <img id='away' style={{width: '50px', height: '50px'}} src={this.state.awayimg} alt=''/>
+              <img id='away' className='pickem-img' src={this.state.awayimg} alt=''/>
             </div>
             <span className='mlr15'>@</span>
             <div onClick={this.picking} id='home' data-id={this.props.home} className={this.props.game.schedule.playedStatus === 'UNPLAYED' && ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation] ? 'pickem-card row' : this.props.game.schedule.playedStatus === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? this.state.homeScore > this.state.awayScore ? 'pickem-card win inactive row':'pickem-card inactive loss row' : 'pickem-card inactive row' }>
-              <img id='home' style={{width: '50px', height: '50px'}} src={this.state.homeimg} alt=''/>
+              <img id='home' className='pickem-img' src={this.state.homeimg} alt=''/>
               {this.props.teams.includes(this.props.home) ? <div className='my-pick'>My Pick</div> : null }
 
               <div id='home' style={{alignItems: 'flex-end'}}className='flex column'>
@@ -368,7 +366,6 @@ class PickemCard extends React.Component {
 }
 
   const mapStateToProps = state => {
-    console.log(state);
     return {
       refs: state.games.refs,
       user:state.user.user,
