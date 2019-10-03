@@ -1,6 +1,8 @@
 import React from 'react';
 import { API_ROOT, HEADERS } from '../constants';
 import {connect} from 'react-redux'
+import {openLogin} from '../actions/modals'
+
 class NewMessageForm extends React.Component {
   state = {
     content: '',
@@ -17,17 +19,21 @@ class NewMessageForm extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault();
-
-    fetch(`${API_ROOT}/messages`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({
-        content: this.state.content,
-        conversation_id: this.state.conversation_id,
-        user_id: this.props.user ? this.props.user.id : 0
-      })
-    });
-    this.setState({ content: '' });
+    if (this.props.user) {
+      fetch(`${API_ROOT}/messages`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({
+          content: this.state.content,
+          conversation_id: this.state.conversation_id,
+          user_id: this.props.user.id,
+          username: this.props.user.username
+        })
+      });
+      this.setState({ content: '' });
+    } else {
+      this.props.openLogin()
+    }
   };
 
   render = () => {
@@ -54,4 +60,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps, null)(NewMessageForm);
+export default connect(mapStateToProps, {openLogin})(NewMessageForm);

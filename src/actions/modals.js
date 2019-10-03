@@ -10,6 +10,12 @@ export const openSignup = () => {
     payload: true
     }
 }
+export const openPickemPrize = () => {
+  return {
+    type: 'OPEN_PICKEM',
+    payload: true
+    }
+}
 
 export const closeModal = () => {
   return {

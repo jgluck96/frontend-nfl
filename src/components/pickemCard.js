@@ -1,5 +1,8 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import {connect} from 'react-redux'
+import $ from 'jquery'
+
+var ODDS = {}
 class PickemCard extends React.Component {
 
   weekTimes = {
@@ -32,9 +35,44 @@ class PickemCard extends React.Component {
     'DAL':'Dallas Cowboys',
     'NO':'NO Saints',
     'CIN':'Cincinnati Bengals',
-    'PIT':'Pitsburgh Steelers',
+    'PIT':'Pittsburgh Steelers',
     'SF':'SF 49ers',
     'NYJ':'NY Jets'
+  }
+
+  teams = {
+    'Philadelphia Eagles':'PHI',
+    'Green Bay Packers':'GB',
+    'New England Patriots':'NE',
+    'Buffalo Bills':'BUF',
+    'Cleveland Browns':'CLE',
+    'Baltimore Ravens':'BAL',
+    'Kansas City Chiefs':'KC',
+    'Detroit Lions':'DET',
+    'Carolina Panthers':'CAR',
+    'Houston Texans':'HOU',
+    'Oakland Raiders':'OAK',
+    'Indianapolis Colts':'IND',
+    'Los Angeles Chargers':'LAC',
+    'Miami Dolphins':'MIA',
+    'Washington Redskins':'WAS',
+    'New York Giants':'NYG',
+    'Tennessee Titans':'TEN',
+    'Atlanta Falcons':'ATL',
+    'Seattle Seahawks':'SEA',
+    'Arizona Cardinals':'ARI',
+    'Tampa Bay Buccaneers':'TB',
+    'Los Angeles Rams':'LA',
+    'Minnesota Vikings':'MIN',
+    'Chicago Bears':'CHI',
+    'Jacksonville Jaguars':'JAX',
+    'Denver Broncos':'DEN',
+    'Dallas Cowboys':'DAL',
+    'New Orleans Saints':'NO',
+    'Cincinnati Bengals':'CIN',
+    'Pittsburgh Steelers':'PIT',
+    'San Francisco 49ers':'SF',
+    'New York Jets':'NYJ'
   }
 
   getDay = {
@@ -50,6 +88,8 @@ class PickemCard extends React.Component {
 
   state = {
     home: '',
+    homeOdds:'',
+    awayOdds:'',
     homeCity: '',
     homeName: '',
     away: '',
@@ -68,7 +108,50 @@ class PickemCard extends React.Component {
     possession: '',
     lineOfScrimmage: '',
     quarterSeconds: '',
-    currQuarter: 0
+    currQuarter: 0,
+    salary: 0
+  }
+
+  // oddsCheck = (obj) => {
+  //   for (key in obj) {
+  //     if (key.home && (this.teams[this.props.game.schedule.homeTeam.abbreviation] === key.home && )) {
+  //
+  //     }
+  //   }
+  // }
+
+  comm = () => {
+    // if (this.props.odds) {
+
+      const foundOdds = this.props.odds.filter(game => {
+        return game.league.name === 'NFL' && game.sites && this.props.game.schedule.homeTeam.abbreviation === this.teams[game.event.home] && this.props.game.schedule.awayTeam.abbreviation === this.teams[game.event.away]
+      })
+      // if (foundOdds.length === 0) {
+      //   $('.pickem-card').addClass('inactive')
+      // } else {
+      if(foundOdds[0]){
+
+        ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation]=foundOdds[0].sites.homeaway[Object.keys(foundOdds[0].sites.homeaway)[1]]
+      }
+
+  }
+
+  oddsChecker = () => {
+    if(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation]) {
+       if(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[2] >= 2) {
+         this.setState({awayOdds: parseInt((ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[2]-1)*100)})
+       } else {
+         this.setState({awayOdds: parseInt((-100)/(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[2]-1))})
+       }
+     }
+    if(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation]) {
+       if(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[1] >= 2) {
+         this.setState({homeOdds: parseInt((ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[1]-1)*100)})
+       } else {
+         this.setState({homeOdds: parseInt((-100)/(ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation].odds[1]-1))})
+       }
+     }
+
   }
 
   componentDidMount() {
@@ -76,9 +159,15 @@ class PickemCard extends React.Component {
     const awayteam = this.props.refs.find(team => team.abbreviation === this.props.game.schedule.awayTeam.abbreviation)
     const home = this.weekTimes[this.props.game.schedule.homeTeam.abbreviation]
     const away = this.weekTimes[this.props.game.schedule.awayTeam.abbreviation]
+    const salary = 60000/this.props.gamess.length
+    setTimeout(()=> {
+        this.comm()
+    }, 2000)
+    this.oddsChecker()
     this.setState({
       home: home,
       away: away,
+      salary: salary,
       homeCity: home.split(' ')[0],
       homeName: home.split(' ')[1],
       awayCity: away.split(' ')[0],
@@ -104,12 +193,12 @@ class PickemCard extends React.Component {
     const awayteam = this.props.refs.find(team => team.abbreviation === this.props.game.schedule.awayTeam.abbreviation)
     const home = this.weekTimes[this.props.game.schedule.homeTeam.abbreviation]
     const away = this.weekTimes[this.props.game.schedule.awayTeam.abbreviation]
-
+    const salary = 60000/this.props.gamess.length
     if (prevState.game.score.currentQuarterSecondsRemaining !== this.props.game.score.currentQuarterSecondsRemaining) {
-console.log('yayyy');
       this.setState({
         home: home,
         away: away,
+        salary: salary,
         homeCity: home.split(' ')[0],
         homeName: home.split(' ')[1],
         awayCity: away.split(' ')[0],
@@ -128,13 +217,74 @@ console.log('yayyy');
         lineOfScrimmage: this.props.game.score.lineOfScrimmage ? {team: this.props.game.score.lineOfScrimmage.team.abbreviation, yardline: this.props.game.score.lineOfScrimmage.yardLine} : ''
       })
     }
+    if (localStorage.getItem('user')) {
+      const parsedLocal = JSON.parse(localStorage.getItem('user'))
+      console.log(prevState.user, prevState);
+      if(prevState.user && (parsedLocal.user.pickems.length > 0 && parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].week === this.props.week)) {
+        console.log('innn');
+        $('.mypick').remove()
+        $('.my-pick').remove()
+        const userteams = parsedLocal.user.pickems[parsedLocal.user.pickems.length-1].teams.split(',')
+          userteams.forEach(team => {
+            if(team) {
+              const newDiv = document.createElement('div')
+              newDiv.innerHTML = 'My Pick'
+              newDiv.className ='mypick'
+            $(document).find(`[data-id='${team}']`).children()[1].before(newDiv)
+            $(document).find(`.pickem-card`).addClass('inactive')
+            }
+          })
+      }
+    }
   }
 
   picking = (e) => {
+    // this.state.
+    // this.props.addSalary()
     if (e.target.id === 'away') {
-      this.setState({awayClicked: !this.state.awayClicked, homeClicked: false})
+      // CALC SALARY WINNINGS
+      let away;
+      let other;
+      if(this.state.awayOdds > 0) {
+         away = (this.state.salary * (this.state.awayOdds/Math.pow(10, 2))) + this.state.salary;
+         if(this.state.homeOdds > 0) {
+           other = (this.state.salary * (this.state.homeOdds/Math.pow(10, 2))) + this.state.salary;
+         } else {
+           other = (this.state.salary/(Math.abs(this.state.homeOdds)/Math.pow(10, 2)))+this.state.salary
+         }
+      } else {
+         away = (this.state.salary/(Math.abs(this.state.awayOdds)/Math.pow(10, 2)))+this.state.salary
+         if(this.state.homeOdds > 0) {
+           other = (this.state.salary * (this.state.homeOdds/Math.pow(10, 2))) + this.state.salary;
+         } else {
+           other = (this.state.salary/(Math.abs(this.state.homeOdds)/Math.pow(10, 2)))+this.state.salary
+         }
+      }
+      // const winnings =
+      this.props.addTeam(this.props.away, this.props.home, away, other)
+
+      // this.setState({awayClicked: !this.state.awayClicked, homeClicked: false})
     } else {
-      this.setState({homeClicked: !this.state.homeClicked, awayClicked: false})
+      // CALC SALARY WINNING
+      let other;
+      let home;
+      if(this.state.homeOdds > 0) {
+         home = (this.state.salary * (this.state.homeOdds/Math.pow(10, 2))) + this.state.salary;
+         if(this.state.awayOdds > 0) {
+           other = (this.state.salary * (this.state.awayOdds/Math.pow(10, 2))) + this.state.salary;
+         } else {
+           other = (this.state.salary/(Math.abs(this.state.awayOdds)/Math.pow(10, 2)))+this.state.salary
+         }
+      } else {
+         home = (this.state.salary/(Math.abs(this.state.homeOdds)/Math.pow(10, 2)))+this.state.salary
+         if(this.state.awayOdds > 0) {
+           other = (this.state.salary * (this.state.awayOdds/Math.pow(10, 2))) + this.state.salary;
+         } else {
+           other = (this.state.salary/(Math.abs(this.state.awayOdds)/Math.pow(10, 2)))+this.state.salary
+         }
+      }
+      this.props.addTeam(this.props.home, this.props.away, home, other)
+      // this.setState({homeClicked: !this.state.homeClicked, awayClicked: false})
     }
   }
 
@@ -164,7 +314,7 @@ console.log('yayyy');
 
         :
 
-          <div className='box-time'>{this.state.status === 'UNPLAYED' ? this.getDay[new Date(this.props.game.schedule.startTime).getDay()] +new Date(this.props.game.schedule.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})+ new Date(this.props.game.schedule.startTime).toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2] : this.state.status === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? 'FINAL' : ''}</div>
+          <div className='box-time'>{this.state.status === 'UNPLAYED' ? this.getDay[new Date(this.props.game.schedule.startTime).getDay()] +' ' +new Date(this.props.game.schedule.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})+ ' '+new Date(this.props.game.schedule.startTime).toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2] : this.state.status === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? 'FINAL' : ''}</div>
         }
           <div className='game-info-content row flex'>
             <div className="score-gi">{this.state.awayScore}</div>
@@ -189,22 +339,24 @@ console.log('yayyy');
         </div>
         <div className="py10">
           <div className="flex justify-align">
-            <div onClick={this.picking} id='away' data-id={this.state.awayName} className={this.props.game.schedule.playedStatus === 'UNPLAYED' ? 'pickem-card row' : this.props.game.schedule.playedStatus === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? this.state.awayScore > this.state.homeScore ? 'pickem-card win inactive row':'pickem-card inactive loss row' : 'pickem-card inactive row' }>
+            <div onClick={this.picking} id='away' data-id={this.props.away} className={this.props.game.schedule.playedStatus === 'UNPLAYED' && ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation] ? 'pickem-card row' : this.props.game.schedule.playedStatus === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? this.state.awayScore > this.state.homeScore ? 'pickem-card win inactive row':'pickem-card inactive loss row' : 'pickem-card inactive row' }>
               <div className='flex column' id='away'>
                   <div id='away' style={{color: 'rgba(0,0,0,0.5)', fontSize: '13px'}}>{this.state.awayCity}</div>
-                  <div id='away' >{this.state.awayName}</div>
+                  <div id='away'>{this.state.awayName}</div>
+                  <div style={{color: 'green', fontSize: '14px'}} id='away'>{this.state.awayOdds ? this.state.awayOdds >= 2 ? '+'+this.state.awayOdds : this.state.awayOdds : <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>}</div>
               </div>
-              {this.state.awayClicked ? <div className='my-pick'>My Pick</div> : null }
+              {this.props.teams.includes(this.props.away) ? <div className='my-pick'>My Pick</div> : null }
               <img id='away' style={{width: '50px', height: '50px'}} src={this.state.awayimg} alt=''/>
             </div>
             <span className='mlr15'>@</span>
-            <div onClick={this.picking} id='home' data-id={this.state.homeName} className={this.props.game.schedule.playedStatus === 'UNPLAYED' ? 'pickem-card row' : this.props.game.schedule.playedStatus === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? this.state.homeScore > this.state.awayScore ? 'pickem-card win inactive row':'pickem-card inactive loss row' : 'pickem-card inactive row' }>
+            <div onClick={this.picking} id='home' data-id={this.props.home} className={this.props.game.schedule.playedStatus === 'UNPLAYED' && ODDS[this.props.game.schedule.homeTeam.abbreviation+this.props.game.schedule.awayTeam.abbreviation] ? 'pickem-card row' : this.props.game.schedule.playedStatus === 'COMPLETED' || this.state.status === 'COMPLETED_PENDING_REVIEW' ? this.state.homeScore > this.state.awayScore ? 'pickem-card win inactive row':'pickem-card inactive loss row' : 'pickem-card inactive row' }>
               <img id='home' style={{width: '50px', height: '50px'}} src={this.state.homeimg} alt=''/>
-              {this.state.homeClicked ? <div className='my-pick'>My Pick</div> : null }
+              {this.props.teams.includes(this.props.home) ? <div className='my-pick'>My Pick</div> : null }
 
-              <div id='home' className='flex column'>
+              <div id='home' style={{alignItems: 'flex-end'}}className='flex column'>
                   <div id='home' style={{color: 'rgba(0,0,0,0.5)', fontSize: '13px'}}>{this.state.homeCity}</div>
                   <div id='home' >{this.state.homeName}</div>
+                  <div style={{color: 'green', fontSize: '14px'}} id='away'>{this.state.homeOdds ? this.state.homeOdds >=2 ? '+'+this.state.homeOdds : this.state.homeOdds : <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>}</div>
               </div>
             </div>
           </div>
@@ -216,9 +368,13 @@ console.log('yayyy');
 }
 
   const mapStateToProps = state => {
+    console.log(state);
     return {
       refs: state.games.refs,
-      gamess: state.games.games
+      user:state.user.user,
+      gamess: state.games.games,
+      week:state.week,
+      odds: state.odds
     }
   }
 

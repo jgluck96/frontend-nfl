@@ -3,7 +3,7 @@ import {connect} from 'react-redux'
 import Modal from '../components/modal'
 import { login } from '../actions/users'
 import { closeModal } from '../actions/modals'
-import { API_ROOT, HEADERS } from '../constants'
+import {  HEADERS } from '../constants'
 import $ from 'jquery'
 
 class Login extends Component {

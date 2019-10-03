@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
-import { ActionCable } from 'react-actioncable-provider';
+import { ActionCableConsumer } from 'react-actioncable-provider';
 import { API_ROOT } from '../constants';
-import NewConversationForm from './newConversationForm';
+// import NewConversationForm from './newConversationForm';
 import MessagesArea from './messagesArea';
 import NewMessageForm from './newMessageForm';
 import Cable from './cable';
@@ -45,6 +45,12 @@ class ConversationsList extends React.Component {
   closeChat = () => {
     // $('conversationsList').addClass('collapse')
     this.setState({clicked: !this.state.clicked})
+    if (this.state.clicked) {
+      $('.conversationsList').height('auto')
+    } else {
+
+      $('.conversationsList').animate({height:20},500)
+    }
   }
 
   render = () => {
@@ -58,11 +64,11 @@ class ConversationsList extends React.Component {
           <div className={this.state.clicked ? 'enter-chat1' : 'exit-chat1'}></div>
           <div className={this.state.clicked ? 'enter-chat2' : 'exit-chat2'}></div>
         </div>
-        <ActionCable
+        <ActionCableConsumer
           channel={{ channel: 'ConversationsChannel' }}
           onReceived={this.handleReceivedConversation}
         />
-        {this.state.conversations.length ? (
+        {this.state.conversations.length > 0 ? (
           <Cable
             conversations={conversations}
             handleReceivedMessage={this.handleReceivedMessage}
